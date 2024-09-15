@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Usuario</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+				<div th:if=${param.exito}>
+					<div class="alert alert-info">Se ha registrado exitosamente a
+						la aplicación</div>
+				</div>
+				<h1 class="text-center mt-5">Registro de Usuario</h1>
+				<form th:action="@{/registro}" method="post" th:object="${persona}">
+					<!-- Datos de la Persona -->
+					<div class="row">
+						<div class="col-md-6">
+							<label for="identificacion" class="form-label">Identificación:</label>
+							<input type="text" class="form-control" id="identificacion"
+								name="identificacion" th:field="*{identificacion}" required>
+						</div>
+						<div class="col-md-6">
+							<label for="PNombre" class="form-label">Primer Nombre:</label> <input
+								type="text" class="form-control" id="PNombre" name="PNombre"
+								th:field="*{PNombre}" required>
+						</div>
+						<div class="col-md-6 mt-3">
+							<label for="SNombre" class="form-label">Segundo Nombre:</label> <input
+								type="text" class="form-control" id="SNombre" name="SNombre"
+								th:field="*{SNombre}">
+						</div>
+						<div class="col-md-6 mt-3">
+							<label for="PApellido" class="form-label">Primer
+								Apellido:</label> <input type="text" class="form-control" id="PApellido"
+								name="PApellido" th:field="*{PApellido}" required>
+						</div>
+						<div class="col-md-6 mt-3">
+							<label for="SApellido" class="form-label">Segundo
+								Apellido:</label> <input type="text" class="form-control" id="SApellido"
+								name="SApellido" th:field="*{SApellido}">
+						</div>
+						<div class="col-md-6 mt-3">
+							<label for="email" class="form-label">Email:</label> <input
+								type="email" class="form-control" id="email" name="email"
+								th:field="*{email}" required>
+						</div>
+						<div class="col-md-6 mt-3">
+							<label for="fechaNacimiento" class="form-label">Fecha de
+								Nacimiento:</label> <input type="date" class="form-control"
+								id="fechaNacimiento" name="fechaNacimiento"
+								th:field="*{fechaNacimiento}" required>
+						</div>
+					</div>
+
+					<!-- Datos de Usuario -->
+					<h2 class="mt-5">Datos del Usuario</h2>
+					<div class="row">
+						<div class="col-md-6 mt-3">
+							<label for="login" class="form-label">Login:</label> <input
+								type="text" class="form-control" id="login" name="login"
+								th:field="*{usuario.login}" required>
+						</div>
+						<div class="col-md-6 mt-3">
+							<label for="password" class="form-label">Contraseña:</label> <input
+								type="password" class="form-control" id="password"
+								name="password" th:field="*{usuario.password}" required>
+						</div>
+						<div class="col-md-6 mt-3">
+							<label for="confirmPassword" class="form-label">Confirmar
+								Contraseña:</label> <input type="password" class="form-control"
+								id="confirmPassword" name="confirmPassword" required>
+						</div>
+					</div>
+					<br>
+
+
+					<div class="form-group">
+						<button type="submit" class="btn btn-primary">Registrar</button>
+						<span>Si estás registrado <a href="/login">Inicia
+								sesión aquí</a></span>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
