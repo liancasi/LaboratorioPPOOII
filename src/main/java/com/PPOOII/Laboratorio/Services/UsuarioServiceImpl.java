@@ -7,10 +7,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.PPOOII.Laboratorio.Entities.Usuario;
@@ -24,89 +26,118 @@ public class UsuarioServiceImpl implements IUsuarioService, UserDetailsService {
 	@Autowired
 	@Qualifier("IUsuarioRepository")
 	private UsuarioRepository IUsuarioRepository;
-	//==================== LOGS ============================
-	//LOGS DE ERROR
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
+	// ==================== LOGS ============================
+	// LOGS DE ERROR
 	private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(PersonaServiceImpl.class);
-	//INSERT
+
+	// INSERT
 	@Override
 	public boolean guardar(Usuario usuario) {
 		try {
 			if (usuario == null) {
 				logger.error("ERROR AGREGAR_USUARIO: EL USUARIO ES NULO!");
-				return false;				
-			}
-			else {
+				return false;
+			} else {
 				IUsuarioRepository.save(usuario);
 				return true;
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			logger.error("ERROR AGREGAR_USUARIO: EL USUARIO NO SE HA GUARDADO!");
 			return false;
 		}
 	}
-	//UPDATE
+
+	// UPDATE
 	@Override
 	public boolean actualizar(Usuario usuario) {
 		try {
-			if ((usuario == null) 
-					|| (usuario.getId().getPersona() == 0) 
-					|| (usuario.getId().getLogin().isEmpty()) 
-					|| (usuario.getId().getLogin() == null)) 
-			{
-				logger.error("ERROR EDITAR_PERSONA:  EL USUARIO ES NULO O EL ID ES 0 O EL LOGIN ES NULL!");		
+			if ((usuario == null) || (usuario.getId().getPersona() == 0) || (usuario.getId().getLogin().isEmpty())
+					|| (usuario.getId().getLogin() == null)) {
+				logger.error("ERROR EDITAR_PERSONA:  EL USUARIO ES NULO O EL ID ES 0 O EL LOGIN ES NULL!");
 				return false;
-			}
-			else {	
+			} else {
 				IUsuarioRepository.save(usuario);
 				return true;
 			}
-		}catch(Exception e) {
-			logger.error("ERROR EDITAR_PERSONA: EL USUARIO NO SE HA EDITADO!");		
+		} catch (Exception e) {
+			logger.error("ERROR EDITAR_PERSONA: EL USUARIO NO SE HA EDITADO!");
 			return false;
 		}
 	}
-	//DELETE
+
+	// DELETE
 	@Override
 	public boolean eliminar(UsuarioPK id) {
 		try {
 			if ((id.getPersona() == 0) || (id.getLogin().isEmpty()) || id.getLogin() == null) {
 				logger.error("ERROR ELIMINAR_PERSONA: EL ID DEL USUARIO ES 0 O NULL!");
 				return false;
-			}
-			else {
+			} else {
 				Usuario usuario = IUsuarioRepository.getUsuarioANDPersona(id.getLogin(), id.getPersona());
 				IUsuarioRepository.delete(usuario);
 				return true;
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			logger.error("ERROR ELIMINAR_PERSONA: LA PERSONA NO SE HA ELIMINADO!");
 			return false;
-		} 
+		}
 	}
-	//LISTA DE PRODUCTOS
+
+	// LISTA DE PRODUCTOS
 	@Override
 	public List<Usuario> consultarUsuario(Pageable pageable) {
-		return  IUsuarioRepository.findAll(pageable).getContent();  
+		return IUsuarioRepository.findAll(pageable).getContent();
 	}
+
 	@Override
 	public Usuario getUsuarioById(UsuarioPK id) {
 		return IUsuarioRepository.getUsuarioANDPersona(id.getLogin(), id.getPersona());
 	}
-	
+
+	@Override
 	public Usuario findByUsernameANDAPIKey(String login, String apikey) {
 		return IUsuarioRepository.findByUsernameANDAPIKey(login, apikey);
 	}
-	
-	//CONSULTA DE CREDENCIALES
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		System.out.println("Buscar el usuario con el repositorio y si no existe lanzar una exepcion. ");
-    	//Buscar el usuario  por el login y basados en la consulta JPQL
-		Usuario appUser = IUsuarioRepository.findByUsername(username);
-    	List grantList = new ArrayList(); // Este objeto es usado para manejar roles de usuario. en este caso NO APLICA.
-    	System.out.println("Crear El objeto UserDetails que va a ir en sesion y retornarlo.");
-    	//Crear El objeto UserDetails que va a ir en sesion y retornarlo.
-    	UserDetails user = (UserDetails) new User(appUser.getId().getLogin(), appUser.getPassword(), grantList);
-    	System.out.println("user:["+user+"]");
-    	return user;
+
+	@Override
+	public Usuario findByUsername(String login) {
+		return IUsuarioRepository.findByUsername(login);
 	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Usuario appUser = IUsuarioRepository.findByUsername(username);
+		if (appUser == null) {
+			throw new UsernameNotFoundException("Usuario no encontrado: " + username);
+		}
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		return new User(appUser.getId().getLogin(), appUser.getPassword(), authorities);
+	}
+
+	@Override
+	public Usuario getUsuarioANDPersona(String login, int persona) {
+		return IUsuarioRepository.getUsuarioANDPersona(login, persona);
+	}
+
+	@Override
+	public boolean cambiarPassword(int id, String newPassword) {
+		Usuario usuario = IUsuarioRepository.findById(id);
+		if (usuario != null) {
+			usuario.setPassword(newPassword); // Asegúrate de que el método setPassword esté disponible
+			IUsuarioRepository.save(usuario);
+			return true;
+		}
+		return false; // Usuario no encontrado
+	}
+
+	@Override
+	public boolean existsByUsername(String username) {
+		return IUsuarioRepository.findByUsername(username) != null; // Cambia el método según sea necesario
+	}
+
+
 }

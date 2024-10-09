@@ -2,12 +2,17 @@ package com.PPOOII.Laboratorio.Controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,9 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.PPOOII.Laboratorio.Entities.Persona;
+import com.PPOOII.Laboratorio.Entities.Usuario;
+import com.PPOOII.Laboratorio.Entities.UsuarioPK;
 import com.PPOOII.Laboratorio.Services.PersonaServiceImpl;
+import com.PPOOII.Laboratorio.Services.UsuarioServiceImpl;
 import com.PPOOII.Laboratorio.Services.Interfaces.IPersonaService;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/Laboratorio1")
 public class PersonaController {
@@ -29,13 +38,35 @@ public class PersonaController {
 	@Autowired
 	@Qualifier("PersonaService")
 	private PersonaServiceImpl personaService;
+	@Autowired
+	@Qualifier("UsuarioService")
+	private UsuarioServiceImpl usuarioService;
+	
 	
 	// ==========MÉTODOS HTTP====================
 	// METODO POST
 	@PostMapping("/persona")
-	public boolean agregarPersona(@RequestBody @Validated Persona persona) {
-		return personaService.guardar(persona);
+	public ResponseEntity<String> agregarPersona(@RequestBody @Validated Persona persona) {
+	    if (usuarioService.existsByUsername(persona.getUsuario().getLogin())) {
+	        return ResponseEntity.status(HttpStatus.CONFLICT).body("El nombre de usuario ya está registrado: " + persona.getUsuario().getLogin());
+	    }
+
+	    if (personaService.existsByEmail(persona.getEmail())) {
+	        return ResponseEntity.status(HttpStatus.CONFLICT).body("El correo ya está registrado: " + persona.getEmail());
+	    }
+
+	    if (personaService.existsByIdentificacion(persona.getIdentificacion())) {
+	        return ResponseEntity.status(HttpStatus.CONFLICT).body("La identificación ya está registrada: " + persona.getIdentificacion());
+	    }
+
+	    boolean isSaved = personaService.guardar(persona);
+	    if (isSaved) {
+	        return ResponseEntity.status(HttpStatus.CREATED).body("Persona registrada exitosamente.");
+	    } else {
+	        return ResponseEntity.status(HttpStatus.CONFLICT).body("Error al registrar la persona.");
+	    }
 	}
+	
 	// MÉTODO PUT
 	@PutMapping("/persona")
 	public boolean editarPersona(@RequestBody @Validated Persona persona) {
@@ -53,6 +84,21 @@ public class PersonaController {
 		return personaService.consultarPersona(pageable);
 	}
 
+	@PostMapping("/personass")
+	public ResponseEntity<?> validarUsuario(@RequestBody Map<String, String> credentials) {
+	    String login = credentials.get("login");
+	    String password = credentials.get("password");
+	    
+	    System.out.println("Login recibido: " + login);
+	    System.out.println("Password recibido: " + password);
+	    
+	    Usuario usuario = usuarioService.findByUsername(login);
+	    if (usuario != null && BCrypt.checkpw(password, usuario.getPassword())) {
+	        return ResponseEntity.ok("Usuario autenticado");
+	    } else {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
+	    }
+	}
 	// ==============MÉTODOS HTTP DE BÚSQUEDA =============
 	// ---GET---
 	@GetMapping("/persona/id/{id}")
@@ -70,6 +116,7 @@ public class PersonaController {
 		return personaService.findByEdad(edad);
 	}
 	
+	@GetMapping("/persona/identificacion/{identificacion}")
 	public Persona getByIdentificacion(@PathVariable("identificacion") int identificacion) {
         return personaService.findByIdentificacion(identificacion);
     }
@@ -105,5 +152,7 @@ public class PersonaController {
     public List<Persona> getByEdadClinica(@PathVariable("edadClinica") String edadClinica) {
         return personaService.findByEdadClinica(edadClinica);
     }
+    
+ 
 }
 

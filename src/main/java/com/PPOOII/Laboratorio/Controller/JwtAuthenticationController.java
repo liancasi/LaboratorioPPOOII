@@ -2,6 +2,7 @@ package com.PPOOII.Laboratorio.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,39 +19,56 @@ import com.PPOOII.Laboratorio.Config.Model.JwtResponse;
 import com.PPOOII.Laboratorio.Entities.Usuario;
 import com.PPOOII.Laboratorio.Services.UsuarioServiceImpl;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@CrossOrigin
+
 public class JwtAuthenticationController {
-	@Autowired
-	JWTAuthenticationConfig jwtAuthtenticationConfig;
-	@Autowired
-	private UserDetailsService jwtInMemoryUserDetailsService;
-	@Autowired
-	@Qualifier("UsuarioService")
-	private UsuarioServiceImpl usuarioServiceImp;
-	@RequestMapping(
-			value = "/authenticate", 
-			method = RequestMethod.POST,
-			consumes = MediaType.APPLICATION_JSON_VALUE,
-			produces = MediaType.APPLICATION_JSON_VALUE
-	)
-	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest, @RequestHeader("APIkey") String APIKey )
-			throws Exception {
-		System.out.println("********************************************************************");
-		System.out.println("authenticationRequest.getUsername():["+authenticationRequest.getUsername()+"]");
-		System.out.println("authenticationRequest.getPassword():["+authenticationRequest.getPassword()+"]");
-		System.out.println("APIKey:["+APIKey+"]");
-		System.out.println("********************************************************************");
-		Usuario user = usuarioServiceImp.findByUsernameANDAPIKey(authenticationRequest.getUsername(), APIKey);
-		final UserDetails userDetails = jwtInMemoryUserDetailsService
-				//.loadUserByUsername(authenticationRequest.getUsername());
-				.loadUserByUsername(user.getId().getLogin());
-		//final String token = jwtAuthtenticationConfig.getJWTToken(userDetails.getUsername());
-		final String token = jwtAuthtenticationConfig.getJWTToken(user.getId().getLogin());
-		System.out.println("********************************************************************");
-		System.out.println("token:["+token+"]");
-		System.out.println("********************************************************************");
-		//return ResponseEntity.ok(new JwtResponse(token, user.getId().getLogin(), user.getPassword()));
-		return ResponseEntity.ok(new JwtResponse(token));
-	}
+    @Autowired
+    JWTAuthenticationConfig jwtAuthenticationConfig;
+
+    @Autowired
+    private UserDetailsService jwtInMemoryUserDetailsService;
+
+    @Autowired
+    @Qualifier("UsuarioService")
+    private UsuarioServiceImpl usuarioServiceImp;
+
+    @RequestMapping(
+            value = "/authenticate",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest, @RequestHeader("apikey") String apikey)
+            throws Exception {
+        System.out.println("********************************************************************");
+        System.out.println("authenticationRequest.getUsername(): [" + authenticationRequest.getUsername() + "]");
+        System.out.println("authenticationRequest.getPassword(): [" + authenticationRequest.getPassword() + "]");
+        System.out.println("APIKey: [" + apikey + "]");
+        System.out.println("********************************************************************");
+
+        // Buscar el usuario utilizando el login y la API Key
+        Usuario user = usuarioServiceImp.findByUsernameANDAPIKey(authenticationRequest.getUsername(), apikey);
+
+        // Verificar si el usuario existe
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
+        }
+
+        // Verificar la contraseña (suponiendo que la contraseña se almacena de forma segura)
+        if (!user.getPassword().equals(authenticationRequest.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
+        }
+
+        // Cargar los detalles del usuario
+        final UserDetails userDetails = jwtInMemoryUserDetailsService.loadUserByUsername(user.getId().getLogin());
+
+        // Generar el token JWT
+        final String token = jwtAuthenticationConfig.getJWTToken(user.getId().getLogin());
+        System.out.println("********************************************************************");
+        System.out.println("token: [" + token + "]");
+        System.out.println("********************************************************************");
+
+        return ResponseEntity.ok(new JwtResponse(token, apikey));
+    }
 }
