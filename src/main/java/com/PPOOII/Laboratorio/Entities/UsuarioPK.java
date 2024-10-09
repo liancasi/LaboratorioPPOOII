@@ -12,7 +12,7 @@ public class UsuarioPK implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "login")
+	@Column(name = "Login")
 	private String login;
 	
 	@Column(name = "persona")
@@ -20,9 +20,9 @@ public class UsuarioPK implements Serializable{
 	
 	public UsuarioPK () {}
 	
-	public UsuarioPK (String login, int persoana) {
+	public UsuarioPK (String login, int persona) {
 		this.login = login;
-		this.persona = persoana;
+		this.persona = persona;
 	}
 
 	public String getLogin() {

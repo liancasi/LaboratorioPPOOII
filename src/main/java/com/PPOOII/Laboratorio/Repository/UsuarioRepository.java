@@ -21,8 +21,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, UsuarioPK>, Cr
 
 	//usr.id.login, usr.id.persona, usr.apikey, usr.password
 	@Query("SELECT usr FROM UsrANDPer usr WHERE usr.id.login = :login")
-	public abstract Usuario findByUsername(@Param("login") String login);
+	public  Usuario findByUsername(@Param("login") String login);
 	
-	@Query("SELECT usr FROM UsrANDPer usr WHERE usr.id.login = :login AND usr.apikey = :apikey ")
-	public abstract Usuario findByUsernameANDAPIKey(@Param("login") String login, @Param("apikey") String APIKey);
+    @Query("SELECT usr FROM UsrANDPer usr WHERE usr.id.persona = :persona")
+    public Usuario findById(@Param("persona") int persona);
+
+	
+	@Query("SELECT usr FROM UsrANDPer usr WHERE usr.id.login = :login AND usr.apikey = :apikey")
+	public Usuario findByUsernameANDAPIKey(@Param("login") String login, @Param("apikey") String apikey);
+
+
 }

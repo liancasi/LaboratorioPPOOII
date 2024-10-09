@@ -16,37 +16,38 @@ public class Persona implements Serializable {
 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Id
-	@Column(name = "ID")
+	@Column(name = "IdPersona")
 	public int id;
 
-	@Column(name = "PNOMBRE", nullable = false)
+	@Column(name = "PrimerNombre", nullable = false)
 	private String pnombre;
 
 	@Column(name = "EDAD")
 	private int edad;
 
-	@Column(name = "ubicacion")
-	private String ubicacion;
+	@OneToOne
+	@Column(name = "Ubicacion")
+	private Ubicacion ubicacion;
 
-	@Column(name = "IDENTIFICACION")
+	@Column(name = "Identificacion")
 	private int identificacion;
 
-	@Column(name = "SNOMBRE")
+	@Column(name = "SegundoNombre")
 	private String SNombre;
 
-	@Column(name = "PAPELLIDO")
+	@Column(name = "PrimerApellido")
 	private String PApellido;
 
-	@Column(name = "SAPELLIDO")
+	@Column(name = "SegundoApellido")
 	private String SApellido;
 
-	@Column(name = "EMAIL")
+	@Column(name = "Email")
 	private String email;
 
-	@Column(name = "FECHANACIMIENTO")
+	@Column(name = "FechaNacimiento")
 	private LocalDate fechaNacimiento;
 
-	@Column(name = "EDADCLINICA")
+	@Column(name = "EdadClinica")
 	private String edadClinica;
 	
 	@JsonManagedReference
@@ -54,20 +55,11 @@ public class Persona implements Serializable {
     private Usuario usuario;
 
 
-	public Persona(int id, String pnombre, int edad, String ubicacion, int identificacion, String pNombre2,
-			String sNombre, String pApellido, String sApellido, String email, LocalDate fechaNacimiento,
-			String edadClinica) {
-		this.id = id;
-		this.pnombre = pnombre;
-		this.edad = edad;
-		this.ubicacion = ubicacion;
-
-	}
 
 	public Persona() {
 	}
 
-	public Persona(String pnombre, int Edad, String ubicacion, int identificacion, String pNombre2, String sNombre,
+	public Persona(String pnombre, int Edad, Ubicacion ubicacion, int identificacion, String pNombre2, String sNombre,
 			String pApellido, String sApellido, String email, LocalDate fechaNacimiento, String edadClinica) {
 		super();
 		this.pnombre = pnombre;
@@ -82,7 +74,7 @@ public class Persona implements Serializable {
 		this.edadClinica = edadClinica;
 	}
 
-	public Persona(int Id, String pnombre, int Edad, String ubicacion) {
+	public Persona(int Id, String pnombre, int Edad, Ubicacion ubicacion) {
 		super();
 		this.id = Id;
 		this.pnombre = pnombre;
@@ -129,11 +121,11 @@ public class Persona implements Serializable {
 		this.edad = edad;
 	}
 
-	public String getUbicacion() {
+	public Ubicacion getUbicacion() {
 		return ubicacion;
 	}
 
-	public void setUbicacion(String ubicacion) {
+	public void setUbicacion(Ubicacion ubicacion) {
 		this.ubicacion = ubicacion;
 	}
 

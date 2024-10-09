@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.PPOOII.Laboratorio.Entities.Persona;
+import com.PPOOII.Laboratorio.Entities.Usuario;
 
 public interface IPersonaService {
 
@@ -23,6 +24,7 @@ public interface IPersonaService {
 
 	//LISTA DE PERSONA POR ID
 	Persona findById(int id);
+	
 	
 	//LISTA DE PERSONA POR IDENTIFICACION
 	   public Persona findByIdentificacion(int identificacion);
@@ -50,4 +52,10 @@ public interface IPersonaService {
 	   
 	   //LISTA DE PERSONA POR EDAD CLINICA
 		public List<Persona> findByEdadClinica(String edadClinica);
+		
+		boolean existsByEmail(String email);
+
+		boolean existsByIdentificacion(int identificacion);
+		
+		
 }

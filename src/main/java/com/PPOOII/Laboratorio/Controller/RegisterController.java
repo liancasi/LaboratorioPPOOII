@@ -2,6 +2,7 @@ package com.PPOOII.Laboratorio.Controller;
 
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.PPOOII.Laboratorio.Entities.Persona;
 import com.PPOOII.Laboratorio.Services.Interfaces.IPersonaService;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @Controller
 @RequestMapping("/registro")
 public class RegisterController {
